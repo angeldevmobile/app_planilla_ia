@@ -3,7 +3,7 @@ import '../../../asistencia_screen_employee/asistencia_screen.dart';
 import '../../../boletas_screen_employee/boletas_screen.dart';
 import '../../../datos_screen_employee/datos_screen.dart';
 import '../../../justificacion_screen_employee/justificacion_screen.dart';
-import '../../../vacaciones_screen_employee/vacaciones_screen.dart';
+import '../../../vacations_screen_employee/vacaciones_screen.dart';
 import '../sidebar/sidebar_vitalis.dart';
 import '../welcome_dash/home_content.dart';
 import 'components/top_bar.dart';

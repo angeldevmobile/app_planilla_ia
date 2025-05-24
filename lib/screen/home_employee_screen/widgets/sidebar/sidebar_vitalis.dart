@@ -93,32 +93,35 @@ class VitalisSidebar extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(
           horizontal: isCollapsed ? 12 : 24,
         ),
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: selected ? Colors.blue : Colors.white,
-            ),
-            if (hasBulb && !isCollapsed)
-              const Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Icon(
-                  Icons.lightbulb_outline,
-                  color: Colors.amber,
-                  size: 16,
-                ),
-              ),
-          ],
+        leading: Icon(
+          icon,
+          color: selected ? Colors.blue : Colors.white,
         ),
         title: isCollapsed
             ? null
-            : Text(
-                label,
-                style: TextStyle(
-                  color: selected ? Colors.blue : Colors.white,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                ),
+            : Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      label,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: selected ? Colors.blue : Colors.white,
+                        fontWeight:
+                            selected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  if (hasBulb)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8.0),
+                      child: Icon(
+                        Icons.lightbulb_outline,
+                        color: Colors.amber,
+                        size: 16,
+                      ),
+                    ),
+                ],
               ),
         selected: selected,
         onTap: onTap,
