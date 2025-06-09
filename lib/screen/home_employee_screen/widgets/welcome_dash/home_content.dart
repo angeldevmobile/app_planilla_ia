@@ -6,9 +6,11 @@ import '../graphics/attendance_chart.dart';
 import 'components/calendar_section.dart';
 import 'components/stats_grid.dart';
 import 'components/welcome_section.dart';
+import '../../../../models/user_model.dart';
 
 class HomeContent extends StatelessWidget {
-  const HomeContent({super.key, required String userName});
+  final UserModel user;
+  const HomeContent({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class HomeContent extends StatelessWidget {
                   flex: 2,
                   child: Column(
                     children: [
-                      WelcomeSection(userName: 'Diana'),
+                      WelcomeSection(userName: user.nombres),
                       AttendanceStatsGrid(),
                     ],
                   ),

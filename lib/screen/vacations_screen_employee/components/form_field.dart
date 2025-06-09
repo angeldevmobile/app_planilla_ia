@@ -119,7 +119,8 @@ class _VacacionesFormState extends State<VacacionesForm> {
       height: 230,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+        border:
+            Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -127,7 +128,8 @@ class _VacacionesFormState extends State<VacacionesForm> {
         children: [
           const Icon(Icons.upload_file, size: 48, color: Colors.deepPurple),
           const SizedBox(height: 12),
-          const Text("Adjuntar Archivo", style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text("Adjuntar Archivo",
+              style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           const Text("Drop your files to upload", textAlign: TextAlign.center),
           const SizedBox(height: 12),
@@ -139,6 +141,35 @@ class _VacacionesFormState extends State<VacacionesForm> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Este widget es reutilizado en vacaciones_screen.dart
+class CustomFormField extends StatelessWidget {
+  final String labelText;
+  final TextEditingController controller;
+  final bool readOnly;
+
+  const CustomFormField({
+    super.key,
+    required this.labelText,
+    required this.controller,
+    this.readOnly = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      readOnly: readOnly,
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: OutlineInputBorder(),
+        filled: true,
+        fillColor: Colors.grey.shade100,
+      ),
+      style: const TextStyle(fontSize: 13),
     );
   }
 }

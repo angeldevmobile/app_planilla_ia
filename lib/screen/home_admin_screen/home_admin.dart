@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../api/admin_user_details.dart';
+import '../../api/planilla_service.dart';
 import '../../models/user_model.dart';
 import '../employees_screen_admin/employee_screen.dart';
 import '../payroll_screen_admin/payroll_screen.dart';
+import '../settings_screen_admin/settings_screen.dart';
 import 'widgets/dashboard_card.dart';
 import 'widgets/employee_list_admin.dart';
 import 'widgets/payroll_trend.dart';
@@ -22,6 +25,10 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   String _selectedPage = 'Dashboard';
 
+  late Future<List<Map<String, String>>> _futureEmployeeData;
+  late Future<double> _futureTotalNomina;
+  late Future<double> _futurePromedioNomina;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +37,9 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
         _isSearchFocused = _searchFocusNode.hasFocus;
       });
     });
+    _futureEmployeeData = UserService().fetchUsuarios();
+    _futureTotalNomina = PlanillaService().fetchTotalNominaMensual();
+    _futurePromedioNomina = PlanillaService().fetchPromedioNominaMensual();
   }
 
   @override
@@ -48,8 +58,7 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
           isSearchFocused: _isSearchFocused,
         );
       case 'Settings':
-        return const Center(
-            child: Text('Settings Page', style: TextStyle(fontSize: 24)));
+        return const AdminClinicSettingsHorizontal();
       default:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,39 +151,78 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
             const SizedBox(height: 24),
 
             // Stats cards
-            const Row(
+            Row(
               children: [
                 Expanded(
-                  child: DashboardCard(
-                    title: 'Total empleados',
-                    value: '5',
-                    change: '3% vs last month',
-                    icon: Icons.people,
+                  child: FutureBuilder<List<Map<String, String>>>(
+                    future: _futureEmployeeData,
+                    builder: (context, snapshot) {
+                      String value = '...';
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        value = '...';
+                      } else if (snapshot.hasData) {
+                        value = snapshot.data!.length.toString();
+                      } else if (snapshot.hasError) {
+                        value = 'Err';
+                      }
+                      return DashboardCard(
+                        title: 'Total empleados',
+                        value: value,
+                        change: '3% vs last month',
+                        icon: Icons.people,
+                      );
+                    },
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
-                  child: DashboardCard(
-                    title: 'Nómina mensual',
-                    value: '\$504,500',
-                    change: '2.5% vs last month',
-                    icon: Icons.attach_money,
+                  child: FutureBuilder<double>(
+                    future: _futureTotalNomina,
+                    builder: (context, snapshot) {
+                      String value = '...';
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        value = '...';
+                      } else if (snapshot.hasData) {
+                        value = '\$${snapshot.data!.toStringAsFixed(2)}';
+                      } else if (snapshot.hasError) {
+                        value = 'Err';
+                      }
+                      return DashboardCard(
+                        title: 'Nómina mensual',
+                        value: value,
+                        change: '2.5% vs last month',
+                        icon: Icons.attach_money,
+                      );
+                    },
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
-                  child: DashboardCard(
-                    title: 'Salario promedio',
-                    value: '\$85,500',
-                    change: '5% vs last month',
-                    icon: Icons.bar_chart,
+                  child: FutureBuilder<double>(
+                    future: _futurePromedioNomina,
+                    builder: (context, snapshot) {
+                      String value = '...';
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        value = '...';
+                      } else if (snapshot.hasData) {
+                        value = '\$${snapshot.data!.toStringAsFixed(2)}';
+                      } else if (snapshot.hasError) {
+                        value = 'Err';
+                      }
+                      return DashboardCard(
+                        title: 'Salario promedio',
+                        value: value,
+                        change: '5% vs last month',
+                        icon: Icons.bar_chart,
+                      );
+                    },
                   ),
                 ),
-                SizedBox(width: 16),
-                Expanded(
+                const SizedBox(width: 16),
+                const Expanded(
                   child: DashboardCard(
                     title: 'Próxima nómina',
-                    value: 'Apr 30, 2025',
+                    value: 'June 30, 2025',
                     change: '3% vs last month',
                     icon: Icons.calendar_today,
                   ),

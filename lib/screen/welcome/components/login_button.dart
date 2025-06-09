@@ -49,14 +49,14 @@ class _LoginButtonState extends State<LoginButton> {
           boxShadow: widget.isHovered
               ? [
                   BoxShadow(
-                    color: Colors.blueAccent.withOpacity(0.6),
+                    color: Colors.blueAccent.withAlpha((0.6 * 255).toInt()),
                     blurRadius: 25,
                     spreadRadius: 5,
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: Colors.blueAccent.withOpacity(0.4),
+                    color: Colors.blueAccent.withAlpha((0.4 * 255).toInt()),
                     blurRadius: 15,
                     spreadRadius: 3,
                   ),

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
-    as custom_picker;
+import '../../../models/ausencia_model.dart';
+import '../../../models/user_model.dart';
+import '../../../api/ausencia_service.dart';
 
 class JustificationForm extends StatefulWidget {
-  const JustificationForm({super.key});
+  final UserModel user;
+  const JustificationForm({super.key, required this.user});
 
   @override
   State<JustificationForm> createState() => _JustificationFormState();
@@ -12,6 +14,10 @@ class JustificationForm extends StatefulWidget {
 
 class _JustificationFormState extends State<JustificationForm> {
   String? _selectedJustificationType;
+  AusenciaModel? _selectedAusencia;
+  final TextEditingController _detailController = TextEditingController();
+  List<AusenciaModel> _ausencias = [];
+
   final List<String> _justificationTypes = [
     'Justificación por Falta',
     'Enfermedad',
@@ -21,12 +27,74 @@ class _JustificationFormState extends State<JustificationForm> {
     'Otro motivo'
   ];
 
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _detailController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _cargarAusenciasNoJustificadas();
+  }
+
+  Future<void> _cargarAusenciasNoJustificadas() async {
+    try {
+      final ausencias = await AusenciaService()
+          .obtenerAusenciasNoJustificadas(widget.user.id_usuario);
+
+      setState(() {
+        _ausencias = ausencias;
+      });
+    } catch (e) {
+      print('Error al cargar ausencias no justificadas: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cargar ausencias: $e')),
+      );
+    }
+  }
+
+  Future<void> _enviarJustificacion() async {
+    if (_selectedAusencia == null ||
+        _selectedJustificationType == null ||
+        _detailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Complete todos los campos')),
+      );
+      return;
+    }
+
+    try {
+      final exito = await AusenciaService().justificarAusenciaPorFecha(
+        idUsuario: widget.user.id_usuario,
+        fecha: _selectedAusencia!.fecha,
+        motivo: _selectedJustificationType!,
+        observaciones: _detailController.text,
+        documentoRespaldo:
+            null, // Por ahora null, puedes manejar archivos después
+      );
+
+      if (exito) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Justificación registrada exitosamente')),
+        );
+        setState(() {
+          _selectedAusencia = null;
+          _selectedJustificationType = null;
+          _detailController.clear();
+        });
+        _cargarAusenciasNoJustificadas();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al registrar la justificación')),
+        );
+      }
+    } catch (e) {
+      print('Error al enviar justificación: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error inesperado: $e')),
+      );
+    }
+  }
 
   @override
   void dispose() {
-    _dateController.dispose();
     _detailController.dispose();
     super.dispose();
   }
@@ -44,9 +112,9 @@ class _JustificationFormState extends State<JustificationForm> {
             borderRadius: BorderRadius.circular(12.0),
             boxShadow: [
               BoxShadow(
-                color: Color(0x11000000),
+                color: const Color(0x11000000),
                 blurRadius: 6,
-                offset: Offset(2, 2),
+                offset: const Offset(2, 2),
               ),
             ],
           ),
@@ -62,125 +130,64 @@ class _JustificationFormState extends State<JustificationForm> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Tipo de solicitud',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const Text('Tipo de solicitud',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                child: DropdownButtonFormField<String>(
-                  value: _selectedJustificationType,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                  hint: const Text('Seleccione un motivo'),
-                  items: _justificationTypes
-                      .map((type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedJustificationType = value;
-                    });
-                  },
-                  isExpanded: true,
-                ),
+              DropdownButtonFormField<String>(
+                value: _selectedJustificationType,
+                items: _justificationTypes.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                hint: const Text('Seleccione el tipo de justificación'),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedJustificationType = value;
+                  });
+                },
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Fecha de Falta',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const Text('Fecha de Falta',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                child: TextFormField(
-                  controller: _dateController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    hintText: 'dd/mm/yyyy',
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: () {
-                        custom_picker.DatePicker.showDatePicker(
-                          context,
-                          showTitleActions: true,
-                          minTime: DateTime(2020),
-                          maxTime: DateTime(2100),
-                          locale: custom_picker.LocaleType.es,
-                          onConfirm: (date) {
-                            setState(() {
-                              _dateController.text =
-                                  DateFormat('dd/MM/yyyy').format(date);
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
+              DropdownButtonFormField<AusenciaModel>(
+                value: _selectedAusencia,
+                items: _ausencias.map((AusenciaModel a) {
+                  return DropdownMenuItem<AusenciaModel>(
+                    value: a,
+                    child: Text(DateFormat('dd/MM/yyyy')
+                        .format(DateTime.parse(a.fecha))),
+                  );
+                }).toList(),
+                hint: const Text('Seleccione una fecha'),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedAusencia = value;
+                  });
+                },
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Justificación Detallada :',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const Text('Justificación Detallada:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                child: TextFormField(
-                  controller: _detailController,
-                  maxLines: 5,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.all(16.0),
-                    hintText: 'Describa el motivo de su justificación...',
-                  ),
+              TextFormField(
+                controller: _detailController,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  hintText: 'Describa el motivo de su justificación...',
+                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 24),
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_selectedJustificationType == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Por favor seleccione un tipo de justificación'),
-                        ),
-                      );
-                      return;
-                    }
-                    // Aquí va la lógica de envío del formulario
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text(
-                    'Enviar Solicitud',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  onPressed: _enviarJustificacion,
+                  child: const Text('Enviar Solicitud'),
                 ),
-              ),
+              )
             ],
           ),
         ),

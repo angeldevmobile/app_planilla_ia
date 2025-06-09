@@ -1,94 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../models/boleta_model1.dart';
+import '../../../api/boleta_service.dart';
 
 class IssuedBoletasTable extends StatefulWidget {
-  const IssuedBoletasTable({super.key});
+  final int idUsuario;
+  const IssuedBoletasTable({super.key, required this.idUsuario});
 
   @override
   State<IssuedBoletasTable> createState() => _IssuedBoletasTableState();
 }
 
-class _IssuedBoletasTableState extends State<IssuedBoletasTable> with TickerProviderStateMixin {
-  final List<Map<String, String>> _boletas = [
-    {
-      "no": "01",
-      "mes": "ABRIL",
-      "año": "2025",
-      "fecha": "12 May 2024",
-      "estado": "Pendiente"
-    },
-    {
-      "no": "02",
-      "mes": "MARZO",
-      "año": "2025",
-      "fecha": "12 May 2024",
-      "estado": "Completado"
-    },
-    {
-      "no": "03",
-      "mes": "FEBRERO",
-      "año": "2025",
-      "fecha": "12 May 2024",
-      "estado": "Completado"
-    },
-    {
-      "no": "04",
-      "mes": "ENERO",
-      "año": "2025",
-      "fecha": "12 May 2024",
-      "estado": "Completado"
-    },
-    {
-      "no": "05",
-      "mes": "DICIEMBRE",
-      "año": "2024",
-      "fecha": "12 May 2024",
-      "estado": "Completado"
-    },
-  ];
+class _IssuedBoletasTableState extends State<IssuedBoletasTable> {
+  late Future<List<BoletaModel>> _futureBoletas;
 
-  Color _estadoColor(String estado) {
-    switch (estado) {
-      case "Completado":
-        return Colors.greenAccent.shade100;
-      case "Pendiente":
-        return Colors.blue.shade100;
-      default:
-        return Colors.grey.shade300;
-    }
+  @override
+  void initState() {
+    super.initState();
+    _futureBoletas = BoletaService().getBoletasPorUsuario(widget.idUsuario);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Boletas Emitidas",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return FutureBuilder<List<BoletaModel>>(
+      future: _futureBoletas,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final boletas = snapshot.data!;
+        return Card(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Boletas Emitidas",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildHeader(),
+                      const Divider(height: 1),
+                      ...boletas.map((boleta) => _buildRow(boleta)),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  const Divider(height: 1),
-                  ..._boletas.map((boleta) => _buildRow(boleta))
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -96,81 +72,56 @@ class _IssuedBoletasTableState extends State<IssuedBoletasTable> with TickerProv
     return Container(
       color: Colors.lightBlue.shade50,
       child: Row(
-        children: const [
+        children: [
           _HeaderCell("No", flex: 1),
           _HeaderCell("MES", flex: 2),
           _HeaderCell("AÑO", flex: 2),
           _HeaderCell("Fecha de pago", flex: 3),
           _HeaderCell("Estado", flex: 2),
-          _HeaderCell("Action", flex: 1),
+          _HeaderCell("Descargar", flex: 2),
         ],
       ),
     );
   }
 
-  Widget _buildRow(Map<String, String> boleta) {
-    return InkWell(
-      onTap: () {
-        // Aquí puedes agregar una acción futura
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Seleccionaste el mes ${boleta["mes"]}"),
-          duration: const Duration(seconds: 1),
-        ));
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-        child: Row(
-          children: [
-            _DataCell(boleta["no"]!, flex: 1),
-            _DataCell(boleta["mes"]!, flex: 2),
-            _DataCell(boleta["año"]!, flex: 2),
-            _DataCell(boleta["fecha"]!, flex: 3),
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _estadoColor(boleta["estado"]!),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    boleta["estado"]!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: boleta["estado"] == "Pendiente" ? Colors.blue : Colors.green,
-                    ),
-                  ),
-                ),
+  Widget _buildRow(BoletaModel boleta) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      child: Row(
+        children: [
+          _DataCell(boleta.id.toString(), flex: 1),
+          _DataCell(boleta.mes, flex: 2),
+          _DataCell(boleta.anio.toString(), flex: 2),
+          _DataCell(boleta.fecha.toString(), flex: 3),
+          _DataCell("Completado", flex: 2),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: IconButton(
+                icon: const Icon(Icons.download_rounded),
+                onPressed: () {
+                  _descargarArchivo(boleta.rutaArchivo);
+                },
               ),
             ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: GestureDetector(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("Descargando boleta de ${boleta["mes"]}..."),
-                      duration: const Duration(seconds: 1),
-                    ));
-                  },
-                  child: AnimatedScale(
-                    duration: const Duration(milliseconds: 150),
-                    scale: 1.0,
-                    child: const Icon(Icons.download_rounded),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  void _descargarArchivo(String ruta) async {
+    final uri = Uri.parse(ruta);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo abrir el archivo: $ruta')),
+      );
+    }
+  }
 }
 
-// Widgets reutilizables para claridad
 class _HeaderCell extends StatelessWidget {
   final String text;
   final int flex;

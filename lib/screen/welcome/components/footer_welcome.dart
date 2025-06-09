@@ -17,7 +17,7 @@ class Footer extends StatelessWidget {
             Text(
               "OPTIMIZADO PARA CHROME, EDGE Y FIREFOX",
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withAlpha((0.7 * 255).toInt()),
                 fontSize: isTablet ? 12 : 14,
                 letterSpacing: 1.2,
               ),
@@ -52,7 +52,7 @@ class Footer extends StatelessWidget {
             Text(
               "© 2025 SmartPayroll - Todos los derechos reservados",
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withAlpha((0.5 * 255).toInt()),
                 fontSize: isTablet ? 10 : 12,
               ),
             ),
@@ -74,13 +74,13 @@ class Footer extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withAlpha((0.3 * 255).toInt()),
             width: 1,
           ),
         ),
         child: IconButton(
           icon: Icon(icon,
-              color: Colors.white.withOpacity(0.7), size: isTablet ? 20 : 24),
+              color: Colors.white.withAlpha((0.7 * 255).toInt()), size: isTablet ? 20 : 24),
           onPressed: () {},
           splashRadius: 20,
         ),

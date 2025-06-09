@@ -5,7 +5,10 @@ Widget buildHeader(String text) {
     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
     child: Text(
       text,
-      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade800, fontSize: 13),
+      style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.grey.shade800,
+          fontSize: 13),
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
       maxLines: 2,
@@ -15,7 +18,8 @@ Widget buildHeader(String text) {
 
 TableRow buildRow(Map<String, String> row, int index) {
   return TableRow(
-    decoration: BoxDecoration(color: index.isOdd ? Colors.grey.shade50 : Colors.white),
+    decoration:
+        BoxDecoration(color: index.isOdd ? Colors.grey.shade50 : Colors.white),
     children: [
       buildCell(row["no"]!),
       buildCell(row["tipo"]!),
@@ -48,7 +52,8 @@ Widget buildStatusCell(String estado) {
       decoration: BoxDecoration(
         color: _estadoColor(estado),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _estadoTextColor(estado).withOpacity(0.3), width: 1),
+        border: Border.all(
+            color: _estadoTextColor(estado).withOpacity(0.3), width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -89,7 +94,7 @@ Color _estadoColor(String estado) {
   switch (estado) {
     case "Pendiente":
       return Colors.blue.shade50;
-    case "Aprobado":
+    case "Completado":
       return Colors.green.shade50;
     case "Rechazado":
       return Colors.red.shade50;
@@ -102,7 +107,7 @@ Color _estadoTextColor(String estado) {
   switch (estado) {
     case "Pendiente":
       return Colors.blue.shade800;
-    case "Aprobado":
+    case "Completado":
       return Colors.green.shade800;
     case "Rechazado":
       return Colors.red.shade800;
@@ -115,7 +120,7 @@ IconData _estadoIcon(String estado) {
   switch (estado) {
     case "Pendiente":
       return Icons.access_time;
-    case "Aprobado":
+    case "Completado":
       return Icons.check_circle;
     case "Rechazado":
       return Icons.cancel;

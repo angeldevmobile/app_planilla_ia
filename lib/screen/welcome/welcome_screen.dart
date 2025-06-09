@@ -127,7 +127,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               ),
                             ],
                             border: Border.all(
-                                color: kSecondaryColor.withOpacity(0.3),
+                                color: kSecondaryColor.withAlpha((0.3 * 255).toInt()),
                               width: 1,
                             ),
                           ),
@@ -141,8 +141,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        kSecondaryColor.withOpacity(0.3),
-                                        kSecondaryColor.withOpacity(0.1),
+                                        kSecondaryColor.withAlpha((0.3 * 255).toInt()),
+                                        kSecondaryColor.withAlpha((0.1 * 255).toInt()),
                                       ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
@@ -150,7 +150,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: kSecondaryColor.withOpacity(0.6),
+                                        color: kSecondaryColor.withAlpha((0.6 * 255).toInt()),
                                         blurRadius: 30,
                                         spreadRadius: 10,
                                       ),
@@ -212,12 +212,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                               horizontal: 5.0),
                                           decoration: BoxDecoration(
                                             color: kSecondaryColor
-                                                .withOpacity(0.1),
+                                                .withAlpha((0.1 * 255).toInt()),
                                             borderRadius:
                                                 BorderRadius.circular(15),
                                             border: Border.all(
                                               color: kSecondaryColor
-                                                  .withOpacity(0.3),
+                                                  .withAlpha((0.3 * 255).toInt()),
                                             ),
                                           ),
                                           child: Center(
@@ -250,7 +250,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         shape: BoxShape.circle,
                                         color: _currentCarouselIndex == index
                                             ? Colors.white
-                                            : Colors.white.withOpacity(0.4),
+                                            : Colors.white.withAlpha((0.4 * 255).toInt()),
                                       ),
                                     );
                                   }).toList(),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../models/user_model.dart';
 
 class AdditionalInfoCard extends StatefulWidget {
-  const AdditionalInfoCard({super.key});
+  final UserModel user;
+  const AdditionalInfoCard({super.key, required this.user});
 
   @override
   State<AdditionalInfoCard> createState() => _AdditionalInfoCardState();
@@ -88,7 +90,7 @@ class _AdditionalInfoCardState extends State<AdditionalInfoCard> {
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  width: double.infinity, // <-- Esto hace el borde más ancho
+                  width: double.infinity, 
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black),

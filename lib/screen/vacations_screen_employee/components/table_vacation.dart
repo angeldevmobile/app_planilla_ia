@@ -1,55 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../../models/user_model.dart';
+import '../../../api/vacacion_service.dart';
+import '../../../models/vacacion_model.dart';
 
-class VacacionesTable extends StatefulWidget {
-  const VacacionesTable({super.key});
+class TableVacation extends StatefulWidget {
+  final UserModel user;
+  const TableVacation({super.key, required this.user});
 
   @override
-  State<VacacionesTable> createState() => _VacacionesTableState();
+  State<TableVacation> createState() => _TableVacationState();
 }
 
-class _VacacionesTableState extends State<VacacionesTable> {
-  List<Map<String, String>> solicitudes = [
-    {
-      "no": "01",
-      "inicio": "12/05/2025",
-      "fin": "13/05/2025",
-      "adjunto": "Sí",
-      "estado": "Pendiente"
-    },
-    {
-      "no": "02",
-      "inicio": "12/05/2025",
-      "fin": "12/05/2025",
-      "adjunto": "Sí",
-      "estado": "Aprobado"
-    },
-    {
-      "no": "03",
-      "inicio": "14/05/2025",
-      "fin": "10/03/2025",
-      "adjunto": "Sí",
-      "estado": "Aprobado"
-    },
-    {
-      "no": "04",
-      "inicio": "15/05/2025",
-      "fin": "20/04/2025",
-      "adjunto": "Sí",
-      "estado": "Rechazado"
-    },
-    {
-      "no": "05",
-      "inicio": "25/05/2025",
-      "fin": "15/10/2024",
-      "adjunto": "Sí",
-      "estado": "Rechazado"
-    },
-  ];
+class _TableVacationState extends State<TableVacation> {
+  List<VacacionModel> vacaciones = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarVacaciones();
+  }
+
+  Future<void> _cargarVacaciones() async {
+    final resultado = await VacacionService()
+        .obtenerVacacionesPorUsuario(widget.user.id_usuario);
+    setState(() {
+      vacaciones = resultado;
+    });
+  }
 
   Color getEstadoColor(String estado) {
     switch (estado) {
       case 'Pendiente':
-        return Colors.lightBlue.shade100;
+        return Colors.orange.shade100;
       case 'Aprobado':
         return Colors.green.shade100;
       case 'Rechazado':
@@ -62,7 +45,7 @@ class _VacacionesTableState extends State<VacacionesTable> {
   Color getEstadoTextColor(String estado) {
     switch (estado) {
       case 'Pendiente':
-        return Colors.blue;
+        return Colors.orange;
       case 'Aprobado':
         return Colors.green;
       case 'Rechazado':
@@ -91,7 +74,6 @@ class _VacacionesTableState extends State<VacacionesTable> {
             const SizedBox(height: 12),
             LayoutBuilder(
               builder: (context, constraints) {
-                // Calcula el ancho para cada columna (6 columnas)
                 final columnWidth = (constraints.maxWidth - 32) / 6;
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -103,60 +85,68 @@ class _VacacionesTableState extends State<VacacionesTable> {
                       columnSpacing: 0,
                       columns: [
                         DataColumn(
-                          label: SizedBox(
-                            width: columnWidth,
-                            child: const Center(child: Text("No")),
-                          ),
-                        ),
+                            label: SizedBox(
+                                width: columnWidth,
+                                child: const Center(child: Text("No")))),
                         DataColumn(
-                          label: SizedBox(
-                            width: columnWidth,
-                            child: const Center(child: Text("Fecha de Inicio")),
-                          ),
-                        ),
+                            label: SizedBox(
+                                width: columnWidth,
+                                child: const Center(
+                                    child: Text("Fecha de Inicio")))),
                         DataColumn(
-                          label: SizedBox(
-                            width: columnWidth,
-                            child: const Center(child: Text("Fecha de Fin")),
-                          ),
-                        ),
+                            label: SizedBox(
+                                width: columnWidth,
+                                child:
+                                    const Center(child: Text("Fecha de Fin")))),
                         DataColumn(
-                          label: SizedBox(
-                            width: columnWidth,
-                            child:
-                                const Center(child: Text("Adjunto conforme")),
-                          ),
-                        ),
+                            label: SizedBox(
+                                width: columnWidth,
+                                child: const Center(
+                                    child: Text("Adjunto conforme")))),
                         DataColumn(
-                          label: SizedBox(
-                            width: columnWidth,
-                            child: const Center(child: Text("Estado")),
-                          ),
-                        ),
+                            label: SizedBox(
+                                width: columnWidth,
+                                child: const Center(child: Text("Estado")))),
                         DataColumn(
-                          label: SizedBox(
-                            width: columnWidth,
-                            child: const Center(child: Text("Action")),
-                          ),
-                        ),
+                            label: SizedBox(
+                                width: columnWidth,
+                                child: const Center(child: Text("Action")))),
                       ],
-                      rows: solicitudes.map((solicitud) {
-                        final estado = solicitud["estado"]!;
+                      rows: vacaciones.asMap().entries.map((entry) {
+                        final index = entry.key + 1;
+                        final vacacion = entry.value;
                         return DataRow(cells: [
                           DataCell(SizedBox(
                               width: columnWidth,
-                              child: Center(child: Text(solicitud["no"]!)))),
+                              child: Center(
+                                  child:
+                                      Text(index.toString().padLeft(2, '0'))))),
+                          DataCell(SizedBox(
+                            width: columnWidth,
+                            child: Text(
+                              DateFormat('dd/MM/yyyy').format(
+                                DateFormat('yyyy-MM-dd')
+                                    .parse(vacacion.fechaInicio),
+                              ),
+                            ),
+                          )),
+                          DataCell(SizedBox(
+                            width: columnWidth,
+                            child: Text(
+                              DateFormat('dd/MM/yyyy').format(
+                                DateFormat('yyyy-MM-dd')
+                                    .parse(vacacion.fechaFin),
+                              ),
+                            ),
+                          )),
                           DataCell(SizedBox(
                               width: columnWidth,
-                              child:
-                                  Center(child: Text(solicitud["inicio"]!)))),
-                          DataCell(SizedBox(
-                              width: columnWidth,
-                              child: Center(child: Text(solicitud["fin"]!)))),
-                          DataCell(SizedBox(
-                              width: columnWidth,
-                              child:
-                                  Center(child: Text(solicitud["adjunto"]!)))),
+                              child: Center(
+                                  child: Text(
+                                      (vacacion.documentoRespaldo?.isNotEmpty ??
+                                              false)
+                                          ? "Sí"
+                                          : "No")))),
                           DataCell(SizedBox(
                             width: columnWidth,
                             child: Center(
@@ -164,36 +154,35 @@ class _VacacionesTableState extends State<VacacionesTable> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: getEstadoColor(estado),
+                                  color: getEstadoColor(
+                                      vacacion.aprobado ?? 'Pendiente'),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
-                                  estado,
+                                  vacacion.aprobado ?? 'Pendiente',
                                   style: TextStyle(
-                                    color: getEstadoTextColor(estado),
+                                    color: getEstadoTextColor(
+                                        vacacion.aprobado ?? 'Pendiente'),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                             ),
                           )),
-                          DataCell(
-                            SizedBox(
-                              width: columnWidth,
-                              child: Center(
-                                child: _AnimatedIconButton(
-                                  onPressed: () {
-                                    // Acción al hacer clic
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              'Guardado solicitud ${solicitud["no"]}')),
-                                    );
-                                  },
-                                ),
+                          DataCell(SizedBox(
+                            width: columnWidth,
+                            child: Center(
+                              child: _AnimatedIconButton(
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Guardado solicitud $index')),
+                                  );
+                                },
                               ),
                             ),
-                          ),
+                          )),
                         ]);
                       }).toList(),
                     ),
@@ -219,17 +208,9 @@ class _AnimatedIconButton extends StatefulWidget {
 class _AnimatedIconButtonState extends State<_AnimatedIconButton> {
   double _scale = 1.0;
 
-  void _onTapDown(TapDownDetails details) {
-    setState(() => _scale = 0.85);
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    setState(() => _scale = 1.0);
-  }
-
-  void _onTapCancel() {
-    setState(() => _scale = 1.0);
-  }
+  void _onTapDown(TapDownDetails details) => setState(() => _scale = 0.85);
+  void _onTapUp(TapUpDetails details) => setState(() => _scale = 1.0);
+  void _onTapCancel() => setState(() => _scale = 1.0);
 
   @override
   Widget build(BuildContext context) {

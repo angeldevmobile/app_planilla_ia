@@ -4,9 +4,11 @@ import 'components/form_data.dart';
 import 'components/table_history.dart';
 import 'components/upload_document.dart';
 import 'components/welcome_justification.dart';
+import '../../../../models/user_model.dart';
 
 class JustificacionScreen extends StatelessWidget {
-  const JustificacionScreen({super.key});
+  final UserModel user;
+  const JustificacionScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -24,18 +26,18 @@ class JustificacionScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      WelcomeJustification(userName: 'Diana'),
+                      WelcomeJustification(userName: user.nombres),
                       const SizedBox(height: 20),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(width: 10),
-                          JustificationForm(),
+                          JustificationForm(user: user),
                           const SizedBox(width: 90),
                           UploadDocument(),
                         ],
                       ),
-                      HistoryTable(),
+                      HistoryTable(user: user),
                     ],
                   ),
                 ),

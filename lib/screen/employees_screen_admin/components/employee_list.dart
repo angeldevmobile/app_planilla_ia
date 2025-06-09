@@ -31,102 +31,97 @@ class _EmployeeListState extends State<EmployeeList> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 1200),
-        child: ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: employeeData.length,
-          itemBuilder: (context, index) {
-            final employee = employeeData[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(employee['name']!,
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: employeeData.length,
+      itemBuilder: (context, index) {
+        final employee = employeeData[index];
+        final estadoRaw = employee['estado'];
+        final estado = (estadoRaw ?? '').toLowerCase();
+        final isActive = estado == 'activo' || estado == 'active';
+
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                // Nombre y correo
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${employee['nombres'] ?? ''} ${employee['apellidos'] ?? ''}',
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text(employee['email']!,
-                        style: const TextStyle(color: Colors.grey)),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        const Text('Position: ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(employee['position']!),
-                      ],
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      Text(
+                        employee['correo'] ?? '',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                // Cargo
+                Expanded(
+                  flex: 2,
+                  child: Text(employee['cargo'] ?? ''),
+                ),
+                // Rol
+                Expanded(
+                  flex: 2,
+                  child: Text(employee['rol'] ?? ''),
+                ),
+                // Estado
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isActive ? Colors.green[100] : Colors.red[100],
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Text('Department: ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(employee['department']!),
-                      ],
+                    alignment:
+                        Alignment.center, 
+                    child: Text(
+                      isActive ? 'activo' : 'inactivo',
+                      style: TextStyle(
+                        color: isActive ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Text('Salary: ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(employee['salary']!),
-                      ],
+                  ),
+                ),
+                // Acciones
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 18),
+                      onPressed: () {
+                        // implementar editar si lo necesitas
+                      },
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: employee['status'] == 'activo'
-                                ? Colors.green.withAlpha((0.2).toInt())
-                                : Colors.red.withAlpha((0.2).toInt()),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            employee['status']!,
-                            style: TextStyle(
-                              color: employee['status'] == 'activo'
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, size: 18),
-                              onPressed: () {
-                                // implementar editar si lo necesitas
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18),
-                              onPressed: () {
-                                removeEmployee(index);
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      onPressed: () {
+                        removeEmployee(index);
+                      },
                     ),
                   ],
                 ),
-              ),
-            );
-          },
-        ),
-      ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

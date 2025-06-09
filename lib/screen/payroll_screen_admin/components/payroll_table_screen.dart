@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -10,86 +12,36 @@ class PayrollTableCard extends StatefulWidget {
 
 class _PayrollTableCardState extends State<PayrollTableCard> {
   DateTime _selectedDay = DateTime.now();
+  List<Map<String, dynamic>> payrolls = [];
+  bool isLoading = true;
 
-  final List<Map<String, dynamic>> payrolls = [
-    {
-      'period': 'March 16–31, 2024',
-      'date': 'Mar 30, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'processed',
-    },
-    {
-      'period': 'March 1–15, 2024',
-      'date': 'Mar 14, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'processed',
-    },
-    {
-      'period': 'February 16–29, 2024',
-      'date': 'Feb 28, 2024',
-      'employees': 6,
-      'total': '\$503,000',
-      'status': 'processed',
-    },
-    {
-      'period': 'February 1–15, 2024',
-      'date': 'Feb 14, 2024',
-      'employees': 6,
-      'total': '\$503,000',
-      'status': 'processed',
-    },
-    {
-      'period': 'April 1–15, 2024',
-      'date': 'Apr 14, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'pending',
-    },
-    {
-      'period': 'April 1–15, 2024',
-      'date': 'Apr 14, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'pending',
-    },
-    {
-      'period': 'April 1–15, 2024',
-      'date': 'Apr 14, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'pending',
-    },
-    {
-      'period': 'April 1–15, 2024',
-      'date': 'Apr 14, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'pending',
-    },
-    {
-      'period': 'March 1–15, 2024',
-      'date': 'Mar 14, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'processed',
-    },
-    {
-      'period': 'March 1–15, 2024',
-      'date': 'Mar 14, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'processed',
-    },
-    {
-      'period': 'March 1–15, 2024',
-      'date': 'Mar 14, 2024',
-      'employees': 6,
-      'total': '\$504,500',
-      'status': 'processed',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchPayrolls();
+  }
+
+  Future<void> fetchPayrolls() async {
+    final response =
+        await http.get(Uri.parse('http://localhost:8085/api/planillas'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        payrolls = data
+            .map((item) => {
+                  'period': '${item['periodo_mes']}/${item['periodo_anio']}',
+                  'date': item['fechaGeneracion'] ?? '',
+                  'employees': 1, 
+                  'total': '\$${item['sueldoNeto'] ?? 0}',
+                  'status': 'processed', 
+                })
+            .toList();
+        isLoading = false;
+      });
+    } else {
+      setState(() => isLoading = false);
+    }
+  }
 
   Widget _statusBadge(String status) {
     Color color;

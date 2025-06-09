@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'components/bole_component.dart';
 import 'components/table_boleta.dart';
+import '../../../../models/user_model.dart';
 
 class BoletasScreen extends StatelessWidget {
-  const BoletasScreen({super.key});
+  final UserModel user;
+  const BoletasScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +24,9 @@ class BoletasScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BoleComponent(userName: 'Diana'),
+                      BoleComponent(userName: user.nombres),
                       const SizedBox(height: 20),
-                      IssuedBoletasTable(),
+                      IssuedBoletasTable(idUsuario: user.id_usuario),
                     ],
                   ),
                 ),

@@ -14,7 +14,7 @@ class AnimatedTable extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: const Color.fromARGB(255, 158, 158, 158).withOpacity(0.2),
             blurRadius: 12,
             spreadRadius: 4,
             offset: const Offset(0, 4),
@@ -30,7 +30,8 @@ class AnimatedTable extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.blue.shade50,
-                border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 1)),
+                border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade200, width: 1)),
               ),
               child: Text(
                 "Historial de solicitudes",
@@ -46,7 +47,8 @@ class AnimatedTable extends StatelessWidget {
               child: Table(
                 defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                 border: TableBorder(
-                  horizontalInside: BorderSide(color: Colors.grey.shade200, width: 1),
+                  horizontalInside:
+                      BorderSide(color: Colors.grey.shade200, width: 1),
                 ),
                 columnWidths: const {
                   0: FlexColumnWidth(1),
