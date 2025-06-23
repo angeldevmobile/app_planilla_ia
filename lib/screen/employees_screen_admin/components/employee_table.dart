@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
+import '../../../api/planilla_service.dart';
 
-class EmployeeTable extends StatelessWidget {
-  final List<Map<String, String>> employeeData;
-  const EmployeeTable({super.key, required this.employeeData});
+class EmployeeTable extends StatefulWidget {
+  final List<Map<String, dynamic>> employeeData;
+  final PlanillaService planillaService;
+
+  const EmployeeTable({
+    super.key,
+    required this.employeeData,
+    required this.planillaService,
+  });
+
+  @override
+  State<EmployeeTable> createState() => _EmployeeTableState();
+}
+
+class _EmployeeTableState extends State<EmployeeTable> {
+  String? loadingId;
 
   @override
   Widget build(BuildContext context) {
@@ -15,43 +29,47 @@ class EmployeeTable extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Encabezados fijos
             Row(
               children: const [
                 Expanded(
-                  flex: 2,
-                  child: Text('NOMBRES',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                    flex: 2,
+                    child: Text('NOMBRES',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
                 Expanded(
-                  child: Text('ROL',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                    child: Text('ROL',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
                 Expanded(
-                  child: Text('CARGO',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                    child: Text('CARGO',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
                 Expanded(
-                  child: Text('ESTADO',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                    child: Text('ESTADO',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
                 Expanded(
-                  child: Text('ACCIONES',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                    child: Text('ACCIONES',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
               ],
             ),
             const Divider(),
-            // Solo las filas hacen scroll
             SizedBox(
               height: 400,
               child: ListView.builder(
-                itemCount: employeeData.length,
+                itemCount: widget.employeeData.length,
                 itemBuilder: (context, index) {
-                  final employee = employeeData[index];
+                  final employee = widget.employeeData[index];
+
+                  // Paso 1: Imprime los datos recibidos para depuración
+                  print('Empleado recibido: $employee');
+
                   final estadoRaw = employee['estado'];
                   final estado = (estadoRaw ?? '').toLowerCase();
-                  final isActive = estado == 'activo' || estado == 'active';
+                  final isActive =
+                      estado == 'activo' || estado == 'active' || estado == '1';
+
+                  // Paso 2: Obtén idPlanilla de forma robusta
+                  final idPlanilla = employee.containsKey('id_planilla') &&
+                          employee['id_planilla'] != null
+                      ? employee['id_planilla'].toString()
+                      : null;
 
                   return Column(
                     children: [
@@ -61,18 +79,18 @@ class EmployeeTable extends StatelessWidget {
                             flex: 2,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  '${employee['nombres'] ?? ''} ${employee['apellidos'] ?? ''}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  employee['correo'] ?? '',
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 12),
-                                ),
+                                    '${employee['nombres'] ?? ''} ${employee['apellidos'] ?? ''}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                Text(employee['correo'] ?? '',
+                                    style: const TextStyle(
+                                        color: Colors.grey, fontSize: 12)),
+                                // Paso 2: Muestra el ID de planilla para depuración visual
+                                Text('ID Planilla: ${idPlanilla ?? "Ninguna"}',
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.blueGrey)),
                               ],
                             ),
                           ),
@@ -88,16 +106,14 @@ class EmployeeTable extends StatelessWidget {
                                     : Colors.red[100],
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              alignment:
-                                  Alignment.center, 
+                              alignment: Alignment.center,
                               child: Text(
                                 isActive ? 'activo' : 'inactivo',
                                 style: TextStyle(
                                   color: isActive ? Colors.green : Colors.red,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                textAlign:
-                                    TextAlign.center, // <-- Centra el texto
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
@@ -113,12 +129,63 @@ class EmployeeTable extends StatelessWidget {
                                       size: 18),
                                   onPressed: () {},
                                 ),
+                                loadingId == idPlanilla
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      )
+                                    : IconButton(
+                                        icon: const Icon(Icons.picture_as_pdf,
+                                            size: 18, color: Colors.indigo),
+                                        tooltip: 'Generar Planilla',
+                                        onPressed: () async {
+                                          // Paso 3: Verifica que el botón solo se activa si el
+                                          // idPlanilla es válido y no está en uso
+                                          if (idPlanilla != null &&
+                                              idPlanilla.isNotEmpty) {
+                                            setState(() {
+                                              loadingId = idPlanilla;
+                                            });
+                                            try {
+                                              final mensaje = await widget
+                                                  .planillaService
+                                                  .generarPlanillaPDF(
+                                                      idPlanilla);
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(mensaje)),
+                                              );
+                                            } catch (e) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Error al generar el PDF')),
+                                              );
+                                            } finally {
+                                              setState(() {
+                                                loadingId = null;
+                                              });
+                                            }
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'No hay planilla disponible')),
+                                            );
+                                          }
+                                        },
+                                      ),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      if (index != employeeData.length - 1)
+                      if (index != widget.employeeData.length - 1)
                         const Divider(height: 1),
                     ],
                   );

@@ -52,10 +52,12 @@ class WorkHoursPageState extends State<WorkHoursPage> {
     if (ingresoRegistrado) return;
     final now = DateTime.now();
     final asistencia = AsistenciaModel(
+      idAsistencia: 0, // Valor dummy, el backend lo ignora al crear
       id_usuario: widget.user.id_usuario,
       fecha: DateFormat('yyyy-MM-dd').format(now),
       hora_entrada: DateFormat('HH:mm:ss').format(now),
       hora_salida: null,
+      horasExtra: 0.0, // Valor dummy, el backend lo ignora al crear
     );
 
     final exito = await AsistenciaService().registrarAsistencia(asistencia);

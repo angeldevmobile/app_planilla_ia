@@ -37,9 +37,15 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
         _isSearchFocused = _searchFocusNode.hasFocus;
       });
     });
+
+    // Aquí defines el baseUrl con el puerto correcto
+    const String baseUrl = 'http://localhost:8085';
+
     _futureEmployeeData = UserService().fetchUsuarios();
-    _futureTotalNomina = PlanillaService().fetchTotalNominaMensual();
-    _futurePromedioNomina = PlanillaService().fetchPromedioNominaMensual();
+    _futureTotalNomina =
+        PlanillaService(baseUrl: baseUrl).fetchTotalNominaMensual();
+    _futurePromedioNomina =
+        PlanillaService(baseUrl: baseUrl).fetchPromedioNominaMensual();
   }
 
   @override

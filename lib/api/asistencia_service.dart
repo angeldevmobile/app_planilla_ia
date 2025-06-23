@@ -12,7 +12,7 @@ class AsistenciaService {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(asistencia.toJson()),
+      body: jsonEncode(asistencia.toCreateJson()),
     );
 
     if (response.statusCode == 200) {
@@ -36,8 +36,7 @@ class AsistenciaService {
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        return AsistenciaModel.fromJson(
-            jsonData); 
+        return AsistenciaModel.fromJson(jsonData);
       } else {
         print('Error al obtener asistencia: ${response.statusCode}');
         return null;
@@ -52,7 +51,7 @@ class AsistenciaService {
     final fechaHoy = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     final uri = Uri.parse(
-      'http://localhost:808/api/asistencia/salida/$idUsuario'
+      'http://localhost:8085/api/asistencia/salida/$idUsuario'
       '?horaSalida=$horaSalida&fecha=$fechaHoy',
     );
 
@@ -68,8 +67,8 @@ class AsistenciaService {
   }
 
   Future<List<AsistenciaModel>> obtenerAsistenciasUsuario(int idUsuario) async {
-    final uri = Uri.parse(
-        'http://localhost:8085/api/asistencia/todos/$idUsuario'); // <-- Ruta del backend
+    final uri =
+        Uri.parse('http://localhost:8085/api/asistencia/todos/$idUsuario');
 
     final response = await http.get(uri);
 

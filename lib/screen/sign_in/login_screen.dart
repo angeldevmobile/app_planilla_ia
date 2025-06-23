@@ -9,6 +9,8 @@ import 'components/animated_text_field.dart';
 import 'components/login_button_sign_in.dart';
 import 'components/login_sign_panel.dart';
 import 'components/logo_sign_in.dart';
+// Import the dart:html library
+import 'dart:html' as html;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -90,6 +92,10 @@ class _LoginScreenState extends State<LoginScreen>
       );
 
       if (!mounted) return;
+
+      // Guardar datos en localStorage para usar en Sidebar
+      html.window.localStorage['nombres'] = user.nombres;
+      html.window.localStorage['correo'] = user.correo;
 
       // Redirige según el rol usando las funciones helper
       if (isAdmin(user.rol)) {

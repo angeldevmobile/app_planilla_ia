@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
+import '../../../api/planilla_service.dart';
 
 class EmployeeList extends StatefulWidget {
-  final List<Map<String, String>> initialEmployeeData;
-  const EmployeeList({super.key, required this.initialEmployeeData});
+  final List<Map<String, dynamic>> employeeData;
+  final PlanillaService planillaService;
+
+  const EmployeeList({
+    super.key,
+    required this.employeeData,
+    required this.planillaService,
+  });
 
   @override
   State<EmployeeList> createState() => _EmployeeListState();
 }
 
 class _EmployeeListState extends State<EmployeeList> {
-  late List<Map<String, String>> employeeData;
+  late List<Map<String, dynamic>> employeeData; // Cambiado a dynamic
 
   @override
   void initState() {
     super.initState();
-    employeeData = List.from(widget.initialEmployeeData); // Copia segura
+    employeeData = List.from(widget.employeeData);
   }
 
-  void addEmployee(Map<String, String> newEmployee) {
+  void addEmployee(Map<String, dynamic> newEmployee) {
+    // Cambiado a dynamic
     setState(() {
       employeeData.add(newEmployee);
     });
@@ -38,8 +46,11 @@ class _EmployeeListState extends State<EmployeeList> {
       itemBuilder: (context, index) {
         final employee = employeeData[index];
         final estadoRaw = employee['estado'];
-        final estado = (estadoRaw ?? '').toLowerCase();
-        final isActive = estado == 'activo' || estado == 'active';
+        final estado = (estadoRaw ?? '').toString().toLowerCase();
+        final isActive =
+            estado == 'activo' || estado == 'active' || estado == '1';
+        final idPlanilla = employee['id_planilla']?.toString();
+        final idUsuario = employee['id_usuario']?.toString();
 
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -50,7 +61,7 @@ class _EmployeeListState extends State<EmployeeList> {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                // Nombre y correo
+                // Nombre, correo, id_usuario, id_planilla
                 Expanded(
                   flex: 3,
                   child: Column(
@@ -64,6 +75,16 @@ class _EmployeeListState extends State<EmployeeList> {
                       Text(
                         employee['correo'] ?? '',
                         style: const TextStyle(color: Colors.grey),
+                      ),
+                      Text(
+                        'ID Usuario: ${idUsuario ?? "No disponible"}',
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.deepPurple),
+                      ),
+                      Text(
+                        'ID Planilla: ${idPlanilla ?? "Ninguna"}',
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.blueGrey),
                       ),
                     ],
                   ),
@@ -88,8 +109,7 @@ class _EmployeeListState extends State<EmployeeList> {
                       color: isActive ? Colors.green[100] : Colors.red[100],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    alignment:
-                        Alignment.center, 
+                    alignment: Alignment.center,
                     child: Text(
                       isActive ? 'activo' : 'inactivo',
                       style: TextStyle(
@@ -113,6 +133,34 @@ class _EmployeeListState extends State<EmployeeList> {
                       icon: const Icon(Icons.delete_outline, size: 18),
                       onPressed: () {
                         removeEmployee(index);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.picture_as_pdf,
+                          size: 18, color: Colors.indigo),
+                      tooltip: 'Activar planilla para descarga',
+                      onPressed: () async {
+                        if (idPlanilla != null) {
+                          try {
+                            final mensaje = await widget.planillaService
+                                .generarPlanillaPDF(idPlanilla);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(mensaje)),
+                            );
+                          } catch (e) {
+                            print('Error al generar el PDF: $e');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Error al generar el PDF')),
+                            );
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('No se encontró una planilla activa')),
+                          );
+                        }
                       },
                     ),
                   ],

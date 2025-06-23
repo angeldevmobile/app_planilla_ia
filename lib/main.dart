@@ -1,12 +1,12 @@
+import 'package:app_planilla_ia/screen/sign_in/login_screen.dart';
 import 'package:app_planilla_ia/screen/welcome/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  initializeDateFormatting('es_ES', null).then((_) {
-    runApp(const MyApp());
-  });
+  await initializeDateFormatting('es_ES', null);
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -19,6 +19,10 @@ class MyApp extends StatelessWidget {
       title: 'SmartPayroll',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const WelcomeScreen(),
+      routes: {
+        '/login': (context) =>
+            const LoginScreen(), 
+      },
     );
   }
 }

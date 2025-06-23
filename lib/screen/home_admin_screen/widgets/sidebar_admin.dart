@@ -1,8 +1,9 @@
+import 'package:web/web.dart' as web;
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatefulWidget {
   final void Function(String)? onMenuSelected;
-  final String selectedPage; 
+  final String selectedPage;
 
   const Sidebar({super.key, this.onMenuSelected, required this.selectedPage});
 
@@ -12,6 +13,26 @@ class Sidebar extends StatefulWidget {
 
 class _SidebarState extends State<Sidebar> {
   bool isCollapsed = false;
+  String? nombres;
+  String? correo;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    setState(() {
+      nombres = web.window.localStorage['nombres'] ?? 'Usuario';
+      correo = web.window.localStorage['correo'] ?? 'correo@example.com';
+    });
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    web.window.localStorage.clear();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,25 +111,25 @@ class _SidebarState extends State<Sidebar> {
             isCollapsed
                 ? IconButton(
                     icon: const Icon(Icons.logout),
-                    onPressed: () {},
+                    onPressed: () => _logout(context),
                   )
                 : Row(
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
-                              'Admin User',
-                              style: TextStyle(
+                              nombres ?? '',
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              'admin@example.com',
-                              style: TextStyle(
+                              correo ?? '',
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
                               ),
@@ -117,11 +138,14 @@ class _SidebarState extends State<Sidebar> {
                           ],
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       IconButton(
                         icon: const Icon(Icons.logout),
-                        onPressed: () {},
-                        constraints: BoxConstraints(),
+                        onPressed: () {
+                          web.window.localStorage.clear();
+                          Navigator.pushReplacementNamed(context, '/login');
+                        },
+                        constraints: const BoxConstraints(),
                         padding: EdgeInsets.zero,
                       ),
                     ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../api/admin_user_details.dart';
-import '../../api/descuentos_service.dart';
+import '../../api/planilla_service.dart';
 import '../../models/planilla_model.dart';
 import 'components/employee_list.dart';
 import 'components/employee_table.dart';
@@ -27,6 +27,10 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   double? sueldoBruto;
   double? bonificaciones;
 
+  // Instancia de PlanillaService con el baseUrl correcto
+  final PlanillaService planillaService =
+      PlanillaService(baseUrl: 'http://localhost:8085');
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +49,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   }
 
   Future<void> generarPlanilla() async {
+    print('Función generarPlanilla llamada');
     try {
       // Obtener el último usuario registrado
       final employeeData = await _futureEmployeeData;
@@ -55,7 +60,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
         return;
       }
 
-      final lastEmployee = employeeData.last; 
+      final lastEmployee = employeeData.last;
       final idUsuario =
           int.parse(lastEmployee['id_usuario']!); // ID del usuario
 
@@ -67,12 +72,13 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
         bonificaciones: bonificaciones ?? 0.0,
       );
 
-      await PlanillaService().generarPlanilla(idUsuario, planilla.toJson());
+      await planillaService.generarPlanilla(idUsuario, planilla.toJson());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Planilla generada y descuentos aplicados')),
       );
     } catch (e) {
+      print('Error al generar la planilla: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
@@ -98,14 +104,14 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () async {
+                      print('Botón "Agregar Empleado" presionado');
                       final result = await showDialog(
                         context: context,
                         builder: (context) => EmployeeRegistrationModal(),
                       );
                       if (result != null) {
                         setState(() {
-                          idUsuario =
-                              result; // Actualiza el idUsuario dinámicamente
+                          idUsuario = result;
                           _futureEmployeeData = UserService().fetchUsuarios();
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +133,10 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
-                    onPressed: generarPlanilla,
+                    onPressed: () {
+                      print('Botón "Aplicar descuento" presionado');
+                      generarPlanilla();
+                    },
                     icon: const Icon(Icons.discount, color: Colors.white),
                     label: const Text('Aplicar descuento'),
                     style: ElevatedButton.styleFrom(
@@ -179,9 +188,14 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                         builder: (context, constraints) {
                           if (constraints.maxWidth < 800) {
                             return EmployeeList(
-                                initialEmployeeData: employeeData);
+                              employeeData: employeeData,
+                              planillaService: planillaService,
+                            );
                           } else {
-                            return EmployeeTable(employeeData: employeeData);
+                            return EmployeeTable(
+                              employeeData: employeeData,
+                              planillaService: planillaService,
+                            );
                           }
                         },
                       ),

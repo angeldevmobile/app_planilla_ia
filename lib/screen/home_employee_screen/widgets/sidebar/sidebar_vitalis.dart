@@ -1,3 +1,5 @@
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 
 import 'components/sidebar_header.dart';
@@ -24,6 +26,11 @@ class VitalisSidebar extends StatelessWidget {
     _MenuItemData(Icons.note_alt_outlined, 'Justificación y Permisos'),
     _MenuItemData(Icons.beach_access, 'Vacaciones', hasBulb: true),
   ];
+
+  Future<void> _logout(BuildContext context) async {
+    html.window.localStorage.clear();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,11 +66,11 @@ class VitalisSidebar extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: TextButton.icon(
-                    onPressed: onToggle,
-                    icon: const Icon(Icons.logout, color: Colors.white),
+                    onPressed: () => _logout(context),
+                    icon: const Icon(Icons.logout, color: Colors.red),
                     label: const Text(
-                      'Cerrar Sesion',
-                      style: TextStyle(color: Colors.white),
+                      'Cerrar Sesión',
+                      style: TextStyle(color: Colors.red),
                     ),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(

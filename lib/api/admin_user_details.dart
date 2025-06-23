@@ -6,12 +6,12 @@ class UserService {
     final url = Uri.parse('http://localhost:8085/api/empleados');
     final response = await http.get(url);
 
-    print('Status code: ${response.statusCode}'); 
-    print('Response body: ${response.body}'); 
+    print('Status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body);
-      print('jsonList: $jsonList'); 
+      print('jsonList: $jsonList');
       return jsonList.cast<Map<String, dynamic>>().map((json) {
         return {
           'nombres': (json['nombres'] ?? '').toString(),
@@ -20,6 +20,8 @@ class UserService {
           'cargo': (json['cargo'] ?? '').toString(),
           'rol': (json['rol'] ?? '').toString(),
           'estado': (json['estado'] ?? '').toString(),
+          'id_planilla':
+              (json['id_planilla'] ?? '').toString(), 
         };
       }).toList();
     } else {
