@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../api/param_labor_service.dart';
 import 'components/auditoria_screen.dart';
 import 'components/backup_screen.dart';
 import 'components/especialidades_screen.dart';
@@ -8,45 +9,57 @@ import 'components/integraciones_screen.dart';
 import 'components/soporte_screen.dart';
 import 'components/summary_card.dart';
 
-class AdminClinicSettingsHorizontal extends StatelessWidget {
+class AdminClinicSettingsHorizontal extends StatefulWidget {
   const AdminClinicSettingsHorizontal({super.key});
 
   @override
+  State<AdminClinicSettingsHorizontal> createState() =>
+      _AdminClinicSettingsHorizontalState();
+}
+
+class _AdminClinicSettingsHorizontalState
+    extends State<AdminClinicSettingsHorizontal> {
+  String selectedSection = 'Configuración';
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header con título
-          const Text(
-            'Panel de Administración - Configuración de Clínica',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2E384D),
-            ),
-          ),
-          const SizedBox(height: 16),
+    return FutureBuilder<List<ParametroLaboral>>(
+      future: ParametroLaboralService.fetchParametros(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        final parametros = snapshot.data ?? [];
 
-          // Menú horizontal
-          _buildHorizontalMenu(context),
-          const SizedBox(height: 24),
+        String getValor(String clave) => parametros
+            .firstWhere((e) => e.clave == clave,
+                orElse: () => ParametroLaboral(id: 0, clave: '', valor: ''))
+            .valor;
 
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const SummaryCard(),
-                const SizedBox(height: 24),
-                _buildMainSettingsSection(),
-                const SizedBox(height: 24),
-                // _buildUserManagementSection(), // Elimina o comenta esta línea
-                _buildAdvancedSettingsSection(),
-              ],
-            ),
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Panel de Administración - Configuración de Clínica',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2E384D),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildHorizontalMenu(context),
+              const SizedBox(height: 24),
+              _buildSectionContent(getValor),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -68,31 +81,32 @@ class AdminClinicSettingsHorizontal extends StatelessWidget {
         child: Row(
           children: [
             _buildMenuButton('Configuración', Icons.settings,
-                selected: true, onPressed: () {}),
+                selected: selectedSection == 'Configuración', onPressed: () {
+              setState(() => selectedSection = 'Configuración');
+            }),
             _buildMenuButton('Especialidades', Icons.medical_services,
-                onPressed: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => EspecialidadesScreen()));
+                selected: selectedSection == 'Especialidades', onPressed: () {
+              setState(() => selectedSection = 'Especialidades');
             }),
-            _buildMenuButton('Horarios', Icons.access_time, onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => HorariosScreen()));
+            _buildMenuButton('Horarios', Icons.access_time,
+                selected: selectedSection == 'Horarios', onPressed: () {
+              setState(() => selectedSection = 'Horarios');
             }),
-            _buildMenuButton('Integraciones', Icons.link, onPressed: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => IntegracionesScreen()));
+            _buildMenuButton('Integraciones', Icons.link,
+                selected: selectedSection == 'Integraciones', onPressed: () {
+              setState(() => selectedSection = 'Integraciones');
             }),
-            _buildMenuButton('Backup', Icons.backup, onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => BackupScreen()));
+            _buildMenuButton('Backup', Icons.backup,
+                selected: selectedSection == 'Backup', onPressed: () {
+              setState(() => selectedSection = 'Backup');
             }),
-            _buildMenuButton('Auditoría', Icons.assignment, onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => AuditoriaScreen()));
+            _buildMenuButton('Auditoría', Icons.assignment,
+                selected: selectedSection == 'Auditoría', onPressed: () {
+              setState(() => selectedSection = 'Auditoría');
             }),
-            _buildMenuButton('Soporte', Icons.help, onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => SoporteScreen()));
+            _buildMenuButton('Soporte', Icons.help,
+                selected: selectedSection == 'Soporte', onPressed: () {
+              setState(() => selectedSection = 'Soporte');
             }),
           ],
         ),
@@ -126,7 +140,37 @@ class AdminClinicSettingsHorizontal extends StatelessWidget {
     );
   }
 
-  Widget _buildMainSettingsSection() {
+  Widget _buildSectionContent(String Function(String) getValor) {
+    switch (selectedSection) {
+      case 'Especialidades':
+        return EspecialidadesScreen();
+      case 'Horarios':
+        return HorariosScreen();
+      case 'Integraciones':
+        return IntegracionesScreen();
+      case 'Backup':
+        return BackupScreen();
+      case 'Auditoría':
+        return AuditoriaScreen();
+      case 'Soporte':
+        return SoporteScreen();
+      case 'Configuración':
+      default:
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              const SummaryCard(),
+              const SizedBox(height: 24),
+              _buildMainSettingsSection(getValor),
+              const SizedBox(height: 24),
+              _buildAdvancedSettingsSection(),
+            ],
+          ),
+        );
+    }
+  }
+
+  Widget _buildMainSettingsSection(String Function(String) getValor) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -182,27 +226,29 @@ class AdminClinicSettingsHorizontal extends StatelessWidget {
               SizedBox(
                 width: 300,
                 child: _buildAdminTextField(
-                    label: 'Nombre de la Clínica', value: 'Clínica San Marcos'),
+                    label: 'Nombre de la Clínica',
+                    value: getValor('Nombre Clinica')),
               ),
               SizedBox(
                 width: 200,
-                child: _buildAdminTextField(label: 'RUC', value: '20123456789'),
+                child:
+                    _buildAdminTextField(label: 'RUC', value: getValor('RUC')),
               ),
               SizedBox(
                 width: 400,
                 child: _buildAdminTextField(
-                    label: 'Dirección', value: 'Av. Principal 123, Lima'),
+                    label: 'Dirección', value: getValor('Dirección')),
               ),
               SizedBox(
                 width: 250,
                 child: _buildAdminTextField(
-                    label: 'Teléfono Principal', value: '+51 987 654 321'),
+                    label: 'Teléfono Principal', value: getValor('Telefono')),
               ),
               SizedBox(
                 width: 350,
                 child: _buildAdminTextField(
                     label: 'Correo Electrónico',
-                    value: 'admin@clinicasanmarcos.com'),
+                    value: getValor('Correo electronico')),
               ),
             ],
           ),
@@ -224,11 +270,17 @@ class AdminClinicSettingsHorizontal extends StatelessWidget {
             runSpacing: 16,
             children: [
               _buildTimeRangeField(
-                  day: 'Lunes a Viernes', start: '08:00 AM', end: '06:00 PM'),
+                  day: 'Mañana',
+                  start: getValor('Mañana').split(' a ').first,
+                  end: getValor('Mañana').split(' a ').last),
               _buildTimeRangeField(
-                  day: 'Sábado', start: '09:00 AM', end: '02:00 PM'),
+                  day: 'Tarde',
+                  start: getValor('Tarde').split(' a ').first,
+                  end: getValor('Tarde').split(' a ').last),
               _buildTimeRangeField(
-                  day: 'Domingo', start: 'Cerrado', end: 'Cerrado'),
+                  day: 'Noche',
+                  start: getValor('Noche').split(' a ').first,
+                  end: getValor('Noche').split(' a ').last),
             ],
           ),
         ],
@@ -251,6 +303,7 @@ class AdminClinicSettingsHorizontal extends StatelessWidget {
         const SizedBox(height: 6),
         TextFormField(
           initialValue: value,
+          readOnly: true,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

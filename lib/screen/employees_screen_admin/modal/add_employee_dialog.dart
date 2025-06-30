@@ -279,10 +279,6 @@ class _EmployeeRegistrationModalState extends State<EmployeeRegistrationModal>
                             child: Text('Régimen General (DL 728)'),
                           ),
                           DropdownMenuItem(
-                            value: 'plazo_fijo',
-                            child: Text('Contrato a Plazo Fijo (DL 728)'),
-                          ),
-                          DropdownMenuItem(
                             value: 'locacion_servicios',
                             child: Text(
                                 'Locación de Servicios (Recibo por Honorarios)'),
@@ -296,21 +292,8 @@ class _EmployeeRegistrationModalState extends State<EmployeeRegistrationModal>
                             child: Text('Practicante Profesional'),
                           ),
                           DropdownMenuItem(
-                            value: 'cas',
-                            child: Text(
-                                'CAS (Contrato Administrativo de Servicios)'),
-                          ),
-                          DropdownMenuItem(
                             value: 'snp',
                             child: Text('Servicios No Personales (SNP)'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'suplencia',
-                            child: Text('Contrato por Suplencia'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'terceros',
-                            child: Text('Contrato por Terceros'),
                           ),
                           DropdownMenuItem(
                             value: 'consultor_externo',
@@ -357,72 +340,6 @@ class _EmployeeRegistrationModalState extends State<EmployeeRegistrationModal>
                                   puestoValue = value;
                                 });
                               },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Correo Organizacional',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: correoController,
-                                        decoration: InputDecoration(
-                                          hintText: 'user@company.com',
-                                          filled: true,
-                                          fillColor: Colors.deepPurple
-                                              .withAlpha((0.05 * 255).toInt()),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 18, vertical: 18),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    AnimatedScale(
-                                      scale: 1,
-                                      duration:
-                                          const Duration(milliseconds: 200),
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {},
-                                        icon: const Icon(Icons.auto_fix_high,
-                                            size: 18, color: Colors.white),
-                                        label: const Text(
-                                          'Generar',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.deepPurple,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 14, vertical: 14),
-                                          elevation: 3,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
                             ),
                           ),
                         ],

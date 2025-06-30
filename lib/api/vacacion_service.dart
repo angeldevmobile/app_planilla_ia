@@ -6,7 +6,6 @@ import '../models/vacacion_model.dart';
 class VacacionService {
   final String baseUrl = 'http://localhost:8085/api/vacaciones';
 
-
   Future<bool> registrarVacacion(VacacionModel model) async {
     final url = Uri.parse('$baseUrl/registrar');
     try {
@@ -28,6 +27,40 @@ class VacacionService {
       }
     } catch (e) {
       debugPrint('Error de conexión al registrar vacaciones: $e');
+      return false;
+    }
+  }
+
+  Future<List<VacacionModel>> obtenerTodasLasSolicitudes() async {
+    final url = Uri.parse('http://localhost:8085/api/admin/vacaciones/todas');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((e) => VacacionModel.fromJson(e)).toList();
+      } else {
+        debugPrint('Error al obtener solicitudes: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('Excepción al obtener solicitudes: $e');
+      return [];
+    }
+  }
+
+  Future<bool> revisarSolicitud(int idVacacion, String aprobado,
+      {String? observaciones}) async {
+    final url = Uri.parse(
+      'http://localhost:8085/api/admin/vacaciones/revisar/$idVacacion'
+      '?aprobado=$aprobado${observaciones != null ? '&observaciones=$observaciones' : ''}',
+    );
+    try {
+      final response = await http.put(url);
+      debugPrint('Estado del servidor: ${response.statusCode}');
+      debugPrint('Respuesta del servidor: ${response.body}');
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error al revisar solicitud: $e');
       return false;
     }
   }

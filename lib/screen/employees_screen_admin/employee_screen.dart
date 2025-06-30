@@ -6,6 +6,7 @@ import 'components/employee_list.dart';
 import 'components/employee_table.dart';
 import 'components/employee_top_app_bar.dart';
 import 'modal/add_employee_dialog.dart';
+import 'modal/revision_vacations.dart';
 
 class EmployeeDirectory extends StatefulWidget {
   const EmployeeDirectory({super.key});
@@ -133,12 +134,16 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      print('Botón "Aplicar descuento" presionado');
-                      generarPlanilla();
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (context) =>
+                            VacationRequestsScreen(), 
+                      );
                     },
-                    icon: const Icon(Icons.discount, color: Colors.white),
-                    label: const Text('Aplicar descuento'),
+                    icon: const Icon(Icons.event_note,
+                        color: Colors.white), 
+                    label: const Text('Revisar Vacaciones'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       foregroundColor: Colors.white,

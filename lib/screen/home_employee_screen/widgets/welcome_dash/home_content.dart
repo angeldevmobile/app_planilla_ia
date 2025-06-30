@@ -1,3 +1,4 @@
+import 'package:app_planilla_ia/api/api_service.dart';
 import 'package:flutter/material.dart';
 
 import '../../screens_employee/boletas_screen.dart';
@@ -28,7 +29,7 @@ class HomeContent extends StatelessWidget {
                   child: Column(
                     children: [
                       WelcomeSection(userName: user.nombres),
-                      AttendanceStatsGrid(),
+                      AttendanceStatsGrid(idUsuario: user.id_usuario),
                     ],
                   ),
                 ),
@@ -45,14 +46,26 @@ class HomeContent extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 2,
-                  child: AttendanceChartCard(),
+                  child: AttendanceChartCard(idUsuario: user.id_usuario),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   flex: 1,
-                  child: CircleGraphics(
-                    justifiedAbsences: 5,
-                    unjustifiedAbsences: 3,
+                  child: FutureBuilder<Map<String, int>>(
+                    future: ApiService().fetchAusenciasPie(user.id_usuario),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return CircleGraphics(
+                          justifiedAbsences: snapshot.data!['justificadas']!,
+                          unjustifiedAbsences:
+                              snapshot.data!['noJustificadas']!,
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text('Error al cargar gráfico');
+                      } else {
+                        return CircularProgressIndicator();
+                      }
+                    },
                   ),
                 ),
               ],
@@ -60,7 +73,7 @@ class HomeContent extends StatelessWidget {
             SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-              child: BoletasScreen(),
+              child: BoletasScreen(user: user),
             ),
           ],
         ),

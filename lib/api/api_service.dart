@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:app_planilla_ia/models/asistencia_dashboard_model.dart';
+import 'package:app_planilla_ia/models/asistencia_mensual_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
@@ -78,16 +80,58 @@ class ApiService {
 
   Future<UserModel> getUserByIdLogeo(String idLogeo) async {
     final uri = Uri.parse('$baseUrl/users/$idLogeo');
-    debugPrint('GET: ${uri.toString()}');
 
-    final response = await http.get(uri);
-    debugPrint('Status Code: ${response.statusCode}');
-    debugPrint('Body: ${response.body}');
+    final response =
+        await http.get(uri).timeout(Duration(seconds: timeoutSeconds));
+    debugPrint('Respuesta getUserByIdLogeo: ${response.body}');
 
     if (response.statusCode == 200) {
-      return UserModel.fromJson(jsonDecode(response.body));
+      final jsonMap = jsonDecode(response.body);
+      jsonMap['id_usuario'] = jsonMap['idUsuario']; // <- solución clave
+      return UserModel.fromJson(jsonMap);
     } else {
-      throw Exception('No se pudo obtener el usuario');
+      throw Exception('Error al obtener usuario por idLogeo');
+    }
+  }
+
+  Future<DashboardStats> fetchDashboardStats(int idUsuario) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/dashboard-stats/$idUsuario'),
+    );
+
+    if (response.statusCode == 200) {
+      return DashboardStats.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Error al obtener estadísticas');
+    }
+  }
+
+  Future<List<AsistenciaMensual>> fetchAsistenciaMensual(int idUsuario) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/dashboard-stats/mensual/$idUsuario'),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => AsistenciaMensual.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al obtener datos mensuales');
+    }
+  }
+
+  Future<Map<String, int>> fetchAusenciasPie(int idUsuario) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/dashboard-stats/ausencias-mes/$idUsuario'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return {
+        'justificadas': data['justificadas'],
+        'noJustificadas': data['noJustificadas'],
+      };
+    } else {
+      throw Exception('Error al obtener ausencias para gráfico circular');
     }
   }
 }

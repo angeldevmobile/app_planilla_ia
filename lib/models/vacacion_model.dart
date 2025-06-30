@@ -1,5 +1,5 @@
 class VacacionModel {
-  final int? idVacacion;
+  final int? idVacacion; // Hacerlo nullable
   final int idUsuario;
   final String fechaInicio;
   final String fechaFin;
@@ -10,7 +10,7 @@ class VacacionModel {
   final String? documentoRespaldo;
 
   VacacionModel({
-    this.idVacacion,
+    this.idVacacion, 
     required this.idUsuario,
     required this.fechaInicio,
     required this.fechaFin,
@@ -20,7 +20,9 @@ class VacacionModel {
     this.observaciones,
     this.documentoRespaldo,
   });
+
   Map<String, dynamic> toJson() => {
+        if (idVacacion != null) "id_vacacion": idVacacion, // Solo si no es null
         "id_usuario": idUsuario,
         "fecha_inicio": fechaInicio,
         "fecha_fin": fechaFin,
@@ -34,12 +36,12 @@ class VacacionModel {
   factory VacacionModel.fromJson(Map<String, dynamic> json) {
     return VacacionModel(
       idVacacion: json['id_vacacion'],
-      idUsuario: json['id_usuario'],
-      fechaInicio: json['fecha_inicio'],
-      fechaFin: json['fecha_fin'],
-      diasCalculados: json['dias_calculados'],
+      idUsuario: json['id_usuario'] ?? 0,
+      fechaInicio: json['fecha_inicio']?.toString() ?? '',
+      fechaFin: json['fecha_fin']?.toString() ?? '',
+      diasCalculados: json['dias_calculados'] ?? 0,
       aprobado: json['aprobado'],
-      fechaSolicitud: json['fecha_solicitud'],
+      fechaSolicitud: json['fecha_solicitud']?.toString() ?? '',
       observaciones: json['observaciones'],
       documentoRespaldo: json['documento_respaldo'],
     );

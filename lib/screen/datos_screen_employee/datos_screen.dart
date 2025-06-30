@@ -38,6 +38,7 @@ class _DatosScreenState extends State<DatosScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
+          print('❌ Error en FutureBuilder: ${snapshot.error}');
           return const Center(child: Text('Error al cargar los datos'));
         } else if (!snapshot.hasData) {
           return const Center(child: Text('No se encontraron datos'));

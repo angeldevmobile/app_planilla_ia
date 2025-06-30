@@ -6,9 +6,22 @@ import 'components/upload_document.dart';
 import 'components/welcome_justification.dart';
 import '../../../../models/user_model.dart';
 
-class JustificacionScreen extends StatelessWidget {
+class JustificacionScreen extends StatefulWidget {
   final UserModel user;
   const JustificacionScreen({super.key, required this.user});
+
+  @override
+  State<JustificacionScreen> createState() => _JustificacionScreenState();
+}
+
+class _JustificacionScreenState extends State<JustificacionScreen> {
+  String? _nombreArchivoRespaldo;
+
+  void _onFileUploaded(String fileName) {
+    setState(() {
+      _nombreArchivoRespaldo = fileName;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,18 +39,26 @@ class JustificacionScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      WelcomeJustification(userName: user.nombres),
+                      WelcomeJustification(userName: widget.user.nombres),
                       const SizedBox(height: 20),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(width: 10),
-                          JustificationForm(user: user),
+                          // Pasa el archivo y el callback al formulario
+                          JustificationForm(
+                            user: widget.user,
+                            nombreArchivoRespaldo: _nombreArchivoRespaldo,
+                            onFileUploaded: _onFileUploaded,
+                          ),
                           const SizedBox(width: 90),
-                          UploadDocument(),
+                          // Solo deja este UploadDocument externo
+                          UploadDocument(
+                            onFileUploaded: _onFileUploaded,
+                          ),
                         ],
                       ),
-                      HistoryTable(user: user),
+                      HistoryTable(user: widget.user),
                     ],
                   ),
                 ),

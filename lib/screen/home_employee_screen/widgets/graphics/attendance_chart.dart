@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'components/attendance_bar_chart.dart';
 
 class AttendanceChartCard extends StatefulWidget {
-  final String? year;
-  const AttendanceChartCard({super.key, this.year});
+  final int idUsuario;
+
+  const AttendanceChartCard({super.key, required this.idUsuario});
 
   @override
   State<AttendanceChartCard> createState() => _AttendanceChartCardState();
@@ -13,6 +14,12 @@ class AttendanceChartCard extends StatefulWidget {
 class _AttendanceChartCardState extends State<AttendanceChartCard> {
   String? selectedYear;
   final List<String> years = ['2022', '2023', '2024', '2025'];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedYear = DateTime.now().year.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +82,10 @@ class _AttendanceChartCardState extends State<AttendanceChartCard> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                AttendanceChart(year: selectedYear),
+                AttendanceChart(
+                  idUsuario: widget.idUsuario,
+                  selectedYear: selectedYear ?? DateTime.now().year.toString(),
+                ),
               ],
             ),
           ),

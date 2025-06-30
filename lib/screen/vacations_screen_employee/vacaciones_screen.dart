@@ -11,7 +11,6 @@ import 'components/form_field.dart';
 import 'components/calendary_vacaciones.dart';
 import '../justificacion_screen_employee/components/welcome_justification.dart';
 
-
 class VacacionesScreen extends StatefulWidget {
   final UserModel user;
   const VacacionesScreen({super.key, required this.user});
@@ -57,11 +56,15 @@ class _VacacionesScreenState extends State<VacacionesScreen> {
       );
       return;
     }
+    final inputFormat = DateFormat('dd/MM/yyyy');
+    final outputFormat = DateFormat('yyyy-MM-dd');
 
     final model = VacacionModel(
+      // idVacacion: null, // Omitido para que el backend lo genere
       idUsuario: widget.user.id_usuario,
-      fechaInicio: fechaInicioController.text,
-      fechaFin: fechaFinController.text,
+      fechaInicio:
+          outputFormat.format(inputFormat.parse(fechaInicioController.text)),
+      fechaFin: outputFormat.format(inputFormat.parse(fechaFinController.text)),
       diasCalculados: diasCalculados,
       fechaSolicitud: DateFormat('yyyy-MM-dd').format(DateTime.now()),
       documentoRespaldo: documentoRespaldoNombre ?? '',
